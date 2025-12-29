@@ -64,6 +64,37 @@ Optional environment variables:
 - `REGISTRY`, `REGISTRY_USER`, `REGISTRY_PASS`
 - `K8S_NAMESPACE`
 
+### Jenkins setup (VM)
+1) Provision a VM (Ubuntu/Debian) and SSH access.
+2) Run:
+```
+ansible-playbook -i ansible/inventories/dev/hosts.ini ansible/playbooks/jenkins-setup.yml
+```
+3) Open Jenkins at `http://<VM_IP>:8080` and finish the setup wizard.
+4) Install plugins: **Git**, **Pipeline**, **Docker**, **Docker Pipeline**, **Kubernetes**.
+5) Configure Docker on the Jenkins host:
+```
+sudo usermod -aG docker jenkins
+sudo systemctl restart jenkins
+```
+6) Add credentials in Jenkins:
+   - Docker registry (username/password)
+   - Kubeconfig (if deploying to K8s)
+
+### Create pipelines
+For each repo (`parking-core-api`, `parking-email-worker`):
+1) New Item → Pipeline
+2) “Pipeline script from SCM”
+3) SCM: Git, Repository URL (your private repo)
+4) Jenkinsfile path: `Parking.CoreApi/Jenkinsfile` or `Parking.EmailWorker/Jenkinsfile`
+
+### Example env vars
+Set these in the pipeline configuration:
+- `REGISTRY=ghcr.io/theodim132`
+- `REGISTRY_USER=<your-user>`
+- `REGISTRY_PASS=<token>`
+- `K8S_NAMESPACE=parking`
+
 ## Public deploy (HTTPS + FQDN)
 Requirement: expose the system via HTTPS with a domain name.
 
