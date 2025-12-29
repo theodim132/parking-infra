@@ -1,0 +1,28 @@
+---
+- name: Install Jenkins (Debian/Ubuntu)
+  hosts: all
+  become: true
+  tasks:
+    - name: Install Java
+      ansible.builtin.package:
+        name: openjdk-17-jre
+        state: present
+
+    - name: Add Jenkins key and repo
+      ansible.builtin.shell: |
+        curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | tee /usr/share/keyrings/jenkins-keyring.asc >/dev/null
+        echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list
+        apt-get update
+      args:
+        executable: /bin/bash
+
+    - name: Install Jenkins
+      ansible.builtin.package:
+        name: jenkins
+        state: present
+
+    - name: Enable Jenkins
+      ansible.builtin.service:
+        name: jenkins
+        state: started
+        enabled: true

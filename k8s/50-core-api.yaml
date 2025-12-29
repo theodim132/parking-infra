@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: core-api
+  namespace: parking
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: core-api
+  template:
+    metadata:
+      labels:
+        app: core-api
+    spec:
+      containers:
+        - name: core-api
+          image: parking-core-api:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ASPNETCORE_URLS
+              value: http://+:8080
+            - name: ConnectionStrings__Default
+              value: Host=postgres;Port=5432;Database=parking;Username=parking;Password=$(POSTGRES_PASSWORD)
+            - name: Auth__Authority
+              valueFrom:
+                configMapKeyRef:
+                  name: parking-config
+                  key: AUTH_AUTHORITY
+            - name: Auth__Audience
+              valueFrom:
+                configMapKeyRef:
+                  name: parking-config
+                  key: AUTH_AUDIENCE
+            - name: Storage__Provider
+              valueFrom:
+                configMapKeyRef:
+                  name: parking-config
+                  key: STORAGE_PROVIDER
+            - name: Storage__Endpoint
+              valueFrom:
+                configMapKeyRef:
+                  name: parking-config
+                  key: STORAGE_ENDPOINT
+            - name: Storage__Bucket
+              valueFrom:
+                configMapKeyRef:
+                  name: parking-config
+                  key: STORAGE_BUCKET
+            - name: Storage__ForcePathStyle
+              valueFrom:
+                configMapKeyRef:
+                  name: parking-config
+                  key: STORAGE_FORCE_PATH_STYLE
+            - name: Storage__AccessKey
+              valueFrom:
+                secretKeyRef:
+                  name: parking-secrets
+                  key: STORAGE_ACCESS_KEY
+            - name: Storage__SecretKey
+              valueFrom:
+                secretKeyRef:
+                  name: parking-secrets
+                  key: STORAGE_SECRET_KEY
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: parking-secrets
+                  key: POSTGRES_PASSWORD
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: core-api
+  namespace: parking
+spec:
+  selector:
+    app: core-api
+  ports:
+    - port: 8080
+      targetPort: 8080

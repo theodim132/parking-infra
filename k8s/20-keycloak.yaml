@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  namespace: parking
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      containers:
+        - name: keycloak
+          image: quay.io/keycloak/keycloak:24.0.5
+          args: ["start-dev", "--import-realm"]
+          ports:
+            - containerPort: 8080
+          env:
+            - name: KEYCLOAK_ADMIN
+              valueFrom:
+                configMapKeyRef:
+                  name: parking-config
+                  key: KEYCLOAK_ADMIN
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: parking-secrets
+                  key: KEYCLOAK_ADMIN_PASSWORD
+            - name: KC_HTTP_ENABLED
+              valueFrom:
+                configMapKeyRef:
+                  name: parking-config
+                  key: KC_HTTP_ENABLED
+          volumeMounts:
+            - name: realm-import
+              mountPath: /opt/keycloak/data/import
+      volumes:
+        - name: realm-import
+          configMap:
+            name: keycloak-realm
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-realm
+  namespace: parking
+data:
+  parking-realm.json: |
+    {"realm":"parking","enabled":true,"roles":{"realm":[{"name":"citizen"},{"name":"admin"}]},"clients":[{"clientId":"parking-api","name":"Parking Core API","enabled":true,"protocol":"openid-connect","publicClient":false,"bearerOnly":true,"standardFlowEnabled":false,"directAccessGrantsEnabled":false},{"clientId":"parking-cli","name":"Parking CLI","enabled":true,"protocol":"openid-connect","publicClient":true,"directAccessGrantsEnabled":true,"standardFlowEnabled":false}],"users":[{"username":"citizen1","enabled":true,"firstName":"Demo","lastName":"Citizen","email":"citizen1@parking.local","emailVerified":true,"credentials":[{"type":"password","value":"Password123!","temporary":false}],"realmRoles":["citizen"]},{"username":"admin1","enabled":true,"firstName":"Demo","lastName":"Admin","email":"admin1@parking.local","emailVerified":true,"credentials":[{"type":"password","value":"Password123!","temporary":false}],"realmRoles":["admin"]}]}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+  namespace: parking
+spec:
+  selector:
+    app: keycloak
+  ports:
+    - port: 8080
+      targetPort: 8080

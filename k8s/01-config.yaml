@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: parking-config
+  namespace: parking
+data:
+  POSTGRES_DB: parking
+  POSTGRES_USER: parking
+  KEYCLOAK_ADMIN: admin
+  KC_HTTP_ENABLED: "true"
+  AUTH_AUTHORITY: http://keycloak:8080/realms/parking
+  AUTH_AUDIENCE: parking-api
+  STORAGE_PROVIDER: S3
+  STORAGE_ENDPOINT: http://minio:9000
+  STORAGE_BUCKET: parking-docs
+  STORAGE_FORCE_PATH_STYLE: "true"
+  EMAIL_HOST: mailhog
+  EMAIL_PORT: "1025"
+  EMAIL_FROM: noreply@parking.local
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: parking-secrets
+  namespace: parking
+type: Opaque
+stringData:
+  POSTGRES_PASSWORD: parking
+  KEYCLOAK_ADMIN_PASSWORD: admin
+  MINIO_ROOT_USER: minioadmin
+  MINIO_ROOT_PASSWORD: minioadmin
+  STORAGE_ACCESS_KEY: minioadmin
+  STORAGE_SECRET_KEY: minioadmin

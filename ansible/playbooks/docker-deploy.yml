@@ -1,0 +1,30 @@
+---
+- name: Deploy stack via docker-compose
+  hosts: all
+  become: true
+  vars:
+    compose_src: "{{ playbook_dir }}/../../docker-compose.yml"
+  tasks:
+    - name: Create project root
+      ansible.builtin.file:
+        path: "{{ project_root }}"
+        state: directory
+        mode: "0755"
+
+    - name: Copy docker-compose.yml
+      ansible.builtin.copy:
+        src: "{{ compose_src }}"
+        dest: "{{ compose_path }}"
+        mode: "0644"
+
+    - name: Pull images
+      ansible.builtin.shell: |
+        docker compose -f {{ compose_path }} pull
+      args:
+        executable: /bin/bash
+
+    - name: Start stack
+      ansible.builtin.shell: |
+        docker compose -f {{ compose_path }} up -d
+      args:
+        executable: /bin/bash

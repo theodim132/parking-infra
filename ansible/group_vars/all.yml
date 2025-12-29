@@ -1,0 +1,12 @@
+---
+project_root: /opt/parking
+compose_path: "{{ project_root }}/docker-compose.yml"
+core_api_image: parking-core-api:latest
+email_worker_image: parking-email-worker:latest
+postgres_password: parking
+keycloak_admin_user: admin
+keycloak_admin_password: admin
+minio_root_user: minioadmin
+minio_root_password: minioadmin
+k8s_namespace: parking
+fqdn: parking.example.com
