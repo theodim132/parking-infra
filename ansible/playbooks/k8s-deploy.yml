@@ -10,7 +10,14 @@
         executable: /bin/bash
 
     - name: Apply manifests
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/../../k8s"
+        dest: "/tmp/parking-k8s"
+        mode: "0755"
+      tags: copy
+
+    - name: Apply manifests
       ansible.builtin.shell: |
-        microk8s kubectl -n {{ k8s_namespace }} apply -f {{ playbook_dir }}/../../k8s
+        microk8s kubectl -n {{ k8s_namespace }} apply -f /tmp/parking-k8s/k8s
       args:
         executable: /bin/bash
