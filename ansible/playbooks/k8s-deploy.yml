@@ -5,12 +5,12 @@
   tasks:
     - name: Create namespace
       ansible.builtin.shell: |
-        kubectl get ns {{ k8s_namespace }} >/dev/null 2>&1 || kubectl create ns {{ k8s_namespace }}
+        microk8s kubectl get ns {{ k8s_namespace }} >/dev/null 2>&1 || microk8s kubectl create ns {{ k8s_namespace }}
       args:
         executable: /bin/bash
 
     - name: Apply manifests
       ansible.builtin.shell: |
-        kubectl -n {{ k8s_namespace }} apply -f {{ playbook_dir }}/../../k8s
+        microk8s kubectl -n {{ k8s_namespace }} apply -f {{ playbook_dir }}/../../k8s
       args:
         executable: /bin/bash
