@@ -58,11 +58,21 @@ Notes:
 - Update `k8s/90-ingress.yaml` host to your FQDN.
 
 ## CI/CD (Jenkins)
-Each service has a Jenkinsfile with optional Docker push and K8s deploy stages.
+Each service has a Jenkinsfile with:
+- Restore/Build/Test
+- Docker build
+- Ansible K8s deploy (targets MicroK8s)
+- Optional Docker push to registry
 
-Optional environment variables:
-- `REGISTRY`, `REGISTRY_USER`, `REGISTRY_PASS`
-- `K8S_NAMESPACE`
+Defaults baked in the Jenkinsfiles:
+- `REGISTRY=172.20.173.171:32000` (MicroK8s registry)
+- `K8S_NAMESPACE=parking`
+- `INFRA_REPO=https://github.com/theodim132/parking-infra.git`
+- Credentials id for private Git: `39aaae8f-ea94-4bf7-88a9-1bc9f29b36a6`
+
+If you want automatic push, set in the Jenkins job:
+- `REGISTRY=172.20.173.171:32000`
+- (Optional) `REGISTRY_USER` / `REGISTRY_PASS` if your registry needs auth
 
 ### Jenkins setup (VM)
 1) Provision a VM (Ubuntu/Debian) and SSH access.
@@ -88,12 +98,16 @@ For each repo (`parking-core-api`, `parking-email-worker`):
 3) SCM: Git, Repository URL (your private repo)
 4) Jenkinsfile path: `Parking.CoreApi/Jenkinsfile` or `Parking.EmailWorker/Jenkinsfile`
 
-### Example env vars
-Set these in the pipeline configuration:
-- `REGISTRY=ghcr.io/theodim132`
-- `REGISTRY_USER=<your-user>`
-- `REGISTRY_PASS=<token>`
-- `K8S_NAMESPACE=parking`
+### Example pipeline setup
+- Create pipeline “parking-core-api”, Jenkinsfile path: `Parking.CoreApi/Jenkinsfile`
+- Create pipeline “parking-email-worker”, Jenkinsfile path: `Parking.EmailWorker/Jenkinsfile`
+- Set branch trigger to master (poll SCM or webhook)
+- Ensure Docker available in Jenkins, and SSH access to the MicroK8s host (`host.docker.internal`).
+
+### Push→Deploy flow (MicroK8s)
+1) Push to `master`.
+2) Jenkins: restore/build/test → docker build → (optional push to registry) → Ansible applies `parking-infra/k8s` to namespace `parking`.
+3) Verify: `wsl -d Ubuntu -- microk8s kubectl -n parking get pods,svc`.
 
 ## Public deploy (HTTPS + FQDN)
 Requirement: expose the system via HTTPS with a domain name.
