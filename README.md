@@ -58,6 +58,17 @@ Notes:
 - Jenkins pushes to `172.20.173.171:32000`. Same registry, different hostname.
 - Update `k8s/90-ingress.yaml` host to your FQDN.
 
+### Access (no port-forward)
+Core API and Keycloak are exposed as NodePort services:
+- Core API: `http://<node_ip>:30080`
+- Keycloak: `http://<node_ip>:30081`
+
+If you want a public HTTPS link without buying a domain, use a quick Cloudflare tunnel:
+```
+cloudflared tunnel --url http://localhost:30080
+```
+This prints a public `https://*.trycloudflare.com` URL you can share for the demo.
+
 ## CI/CD (Jenkins)
 Each service has a Jenkinsfile with:
 - Restore/Build/Test

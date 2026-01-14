@@ -75,8 +75,10 @@ metadata:
   name: core-api
   namespace: parking
 spec:
+  type: NodePort
   selector:
     app: core-api
   ports:
     - port: 8080
       targetPort: 8080
+      nodePort: 30080
