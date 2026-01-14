@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: core-api
-          image: 172.20.173.171:32000/parking-core-api:latest
+          image: localhost:32000/parking-core-api:latest
           ports:
             - containerPort: 8080
           env:

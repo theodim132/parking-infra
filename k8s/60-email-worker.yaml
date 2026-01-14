@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: email-worker
-          image: 172.20.173.171:32000/parking-email-worker:latest
+          image: localhost:32000/parking-email-worker:latest
           env:
             - name: ConnectionStrings__Default
               value: Host=postgres;Port=5432;Database=parking;Username=parking;Password=$(POSTGRES_PASSWORD)

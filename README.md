@@ -54,7 +54,8 @@ kubectl apply -f k8s/
 ```
 
 Notes:
-- Replace image names in `k8s/50-core-api.yaml` and `k8s/60-email-worker.yaml` with your registry images.
+- `k8s/50-core-api.yaml` and `k8s/60-email-worker.yaml` pull from `localhost:32000`, which is the MicroK8s registry as seen by the cluster.
+- Jenkins pushes to `172.20.173.171:32000`. Same registry, different hostname.
 - Update `k8s/90-ingress.yaml` host to your FQDN.
 
 ## CI/CD (Jenkins)
@@ -65,7 +66,7 @@ Each service has a Jenkinsfile with:
 - Optional Docker push to registry
 
 Defaults baked in the Jenkinsfiles:
-- `REGISTRY=172.20.173.171:32000` (MicroK8s registry)
+- `REGISTRY=172.20.173.171:32000` (MicroK8s registry, pushed from Jenkins)
 - `K8S_NAMESPACE=parking`
 - `INFRA_REPO=https://github.com/theodim132/parking-infra.git`
 - Credentials id for private Git: `39aaae8f-ea94-4bf7-88a9-1bc9f29b36a6`
