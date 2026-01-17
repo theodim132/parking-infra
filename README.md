@@ -77,13 +77,13 @@ Each service has a Jenkinsfile with:
 - Optional Docker push to registry
 
 Defaults baked in the Jenkinsfiles:
-- `REGISTRY=172.20.173.171:32000` (MicroK8s registry, pushed from Jenkins)
+- `REGISTRY=localhost:32000` (MicroK8s registry on the same VM)
 - `K8S_NAMESPACE=parking`
 - `INFRA_REPO=https://github.com/theodim132/parking-infra.git`
 - Credentials id for private Git: `39aaae8f-ea94-4bf7-88a9-1bc9f29b36a6`
 
 If you want automatic push, set in the Jenkins job:
-- `REGISTRY=172.20.173.171:32000`
+- `REGISTRY=localhost:32000`
 - (Optional) `REGISTRY_USER` / `REGISTRY_PASS` if your registry needs auth
 
 ### Jenkins setup (VM)

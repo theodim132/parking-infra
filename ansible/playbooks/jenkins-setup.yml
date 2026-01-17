@@ -26,3 +26,14 @@
         name: jenkins
         state: started
         enabled: true
+
+    - name: Add Jenkins user to docker group
+      ansible.builtin.user:
+        name: jenkins
+        groups: docker
+        append: true
+
+    - name: Restart Jenkins
+      ansible.builtin.service:
+        name: jenkins
+        state: restarted
