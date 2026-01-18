@@ -3,11 +3,22 @@ kind: Ingress
 metadata:
   name: parking-ingress
   namespace: parking
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
+    nginx.ingress.kubernetes.io/proxy-buffers: "8 16k"
+    nginx.ingress.kubernetes.io/proxy-busy-buffers-size: "24k"
 spec:
   rules:
     - host: parking-demo.swedencentral.cloudapp.azure.com
       http:
         paths:
+          - path: /auth
+            pathType: Prefix
+            backend:
+              service:
+                name: keycloak
+                port:
+                  number: 8080
           - path: /
             pathType: Prefix
             backend:
