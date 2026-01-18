@@ -41,6 +41,12 @@ spec:
               value: edge
             - name: KC_HOSTNAME
               value: parking-demo.swedencentral.cloudapp.azure.com
+            - name: KC_HOSTNAME_URL
+              value: https://parking-demo.swedencentral.cloudapp.azure.com/auth
+            - name: KC_HOSTNAME_STRICT
+              value: "true"
+            - name: KC_HOSTNAME_STRICT_HTTPS
+              value: "true"
           volumeMounts:
             - name: realm-import
               mountPath: /opt/keycloak/data/import
