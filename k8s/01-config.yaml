@@ -8,8 +8,9 @@ data:
   POSTGRES_USER: parking
   KEYCLOAK_ADMIN: admin
   KC_HTTP_ENABLED: "true"
-  AUTH_AUTHORITY: http://keycloak:8080/realms/parking
+  AUTH_AUTHORITY: https://parking-demo.swedencentral.cloudapp.azure.com/auth/realms/parking
   AUTH_AUDIENCE: parking-api
+  AUTH_CLIENT_ID: parking-ui
   STORAGE_PROVIDER: S3
   STORAGE_ENDPOINT: http://minio:9000
   STORAGE_BUCKET: parking-docs
