@@ -41,6 +41,11 @@ spec:
                 configMapKeyRef:
                   name: parking-config
                   key: AUTH_CLIENT_ID
+            - name: Auth__ClientSecret
+              valueFrom:
+                secretKeyRef:
+                  name: parking-secrets
+                  key: AUTH_CLIENT_SECRET
             - name: Storage__Provider
               valueFrom:
                 configMapKeyRef:

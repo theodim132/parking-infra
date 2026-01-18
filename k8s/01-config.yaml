@@ -28,6 +28,7 @@ type: Opaque
 stringData:
   POSTGRES_PASSWORD: parking
   CONNECTIONSTRINGS_DEFAULT: Host=postgres;Port=5432;Database=parking;Username=parking;Password=parking
+  AUTH_CLIENT_SECRET: lrLK0yan4csa5vztVATxJ7wBjb10vb6g
   KEYCLOAK_ADMIN_PASSWORD: admin
   MINIO_ROOT_USER: minioadmin
   MINIO_ROOT_PASSWORD: minioadmin
