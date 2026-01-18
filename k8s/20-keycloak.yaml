@@ -35,6 +35,12 @@ spec:
                 configMapKeyRef:
                   name: parking-config
                   key: KC_HTTP_ENABLED
+            - name: KC_HTTP_RELATIVE_PATH
+              value: /auth
+            - name: KC_PROXY
+              value: edge
+            - name: KC_HOSTNAME
+              value: parking-demo.swedencentral.cloudapp.azure.com
           volumeMounts:
             - name: realm-import
               mountPath: /opt/keycloak/data/import
