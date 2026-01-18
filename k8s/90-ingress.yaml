@@ -8,6 +8,7 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-buffers: "8 16k"
     nginx.ingress.kubernetes.io/proxy-busy-buffers-size: "24k"
 spec:
+  ingressClassName: public
   rules:
     - host: parking-demo.swedencentral.cloudapp.azure.com
       http:
