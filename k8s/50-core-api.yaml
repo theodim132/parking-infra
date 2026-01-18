@@ -81,6 +81,25 @@ spec:
                 secretKeyRef:
                   name: parking-secrets
                   key: POSTGRES_PASSWORD
+          volumeMounts:
+            - name: dataprotection-keys
+              mountPath: /app/keys
+      volumes:
+        - name: dataprotection-keys
+          persistentVolumeClaim:
+            claimName: core-api-keys-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: core-api-keys-pvc
+  namespace: parking
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
 ---
 apiVersion: v1
 kind: Service
