@@ -5,7 +5,7 @@ metadata:
   namespace: parking
 spec:
   rules:
-    - host: parking.example.com
+    - host: parking-demo.swedencentral.cloudapp.azure.com
       http:
         paths:
           - path: /
