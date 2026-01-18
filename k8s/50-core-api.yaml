@@ -22,7 +22,10 @@ spec:
             - name: ASPNETCORE_URLS
               value: http://+:8080
             - name: ConnectionStrings__Default
-              value: Host=postgres;Port=5432;Database=parking;Username=parking;Password=$(POSTGRES_PASSWORD)
+              valueFrom:
+                secretKeyRef:
+                  name: parking-secrets
+                  key: CONNECTIONSTRINGS_DEFAULT
             - name: Auth__Authority
               valueFrom:
                 configMapKeyRef:
