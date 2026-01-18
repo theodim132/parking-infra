@@ -31,6 +31,11 @@ spec:
                 configMapKeyRef:
                   name: parking-config
                   key: AUTH_AUTHORITY
+            - name: Auth__RequireHttpsMetadata
+              valueFrom:
+                configMapKeyRef:
+                  name: parking-config
+                  key: AUTH_REQUIRE_HTTPS_METADATA
             - name: Auth__Audience
               valueFrom:
                 configMapKeyRef:
