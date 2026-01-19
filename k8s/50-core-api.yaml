@@ -22,17 +22,35 @@ spec:
             - name: ASPNETCORE_URLS
               value: http://+:8080
             - name: ConnectionStrings__Default
-              value: Host=postgres;Port=5432;Database=parking;Username=parking;Password=$(POSTGRES_PASSWORD)
+              valueFrom:
+                secretKeyRef:
+                  name: parking-secrets
+                  key: CONNECTIONSTRINGS_DEFAULT
             - name: Auth__Authority
               valueFrom:
                 configMapKeyRef:
                   name: parking-config
                   key: AUTH_AUTHORITY
+            - name: Auth__RequireHttpsMetadata
+              valueFrom:
+                configMapKeyRef:
+                  name: parking-config
+                  key: AUTH_REQUIRE_HTTPS_METADATA
             - name: Auth__Audience
               valueFrom:
                 configMapKeyRef:
                   name: parking-config
                   key: AUTH_AUDIENCE
+            - name: Auth__ClientId
+              valueFrom:
+                configMapKeyRef:
+                  name: parking-config
+                  key: AUTH_CLIENT_ID
+            - name: Auth__ClientSecret
+              valueFrom:
+                secretKeyRef:
+                  name: parking-secrets
+                  key: AUTH_CLIENT_SECRET
             - name: Storage__Provider
               valueFrom:
                 configMapKeyRef:
@@ -68,6 +86,25 @@ spec:
                 secretKeyRef:
                   name: parking-secrets
                   key: POSTGRES_PASSWORD
+          volumeMounts:
+            - name: dataprotection-keys
+              mountPath: /app/keys
+      volumes:
+        - name: dataprotection-keys
+          persistentVolumeClaim:
+            claimName: core-api-keys-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: core-api-keys-pvc
+  namespace: parking
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
 ---
 apiVersion: v1
 kind: Service

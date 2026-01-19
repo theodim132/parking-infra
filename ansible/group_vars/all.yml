@@ -9,4 +9,4 @@ keycloak_admin_password: admin
 minio_root_user: minioadmin
 minio_root_password: minioadmin
 k8s_namespace: parking
-fqdn: parking.example.com
+fqdn: parking-demo.swedencentral.cloudapp.azure.com
