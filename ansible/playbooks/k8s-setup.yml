@@ -2,34 +2,7 @@
 - name: Install MicroK8s and kubectl
   hosts: all
   become: true
-  tasks:
-    - name: Install snapd (Debian/Ubuntu)
-      ansible.builtin.package:
-        name: snapd
-        state: present
-
-    - name: Install MicroK8s
-      ansible.builtin.shell: |
-        snap install microk8s --classic
-      args:
-        executable: /bin/bash
-
-    - name: Add user to microk8s group
-      ansible.builtin.user:
-        name: "{{ ansible_user_id }}"
-        groups: microk8s
-        append: true
-
-    - name: Enable MicroK8s addons
-      ansible.builtin.shell: |
-        microk8s status --wait-ready
-        microk8s enable dns storage registry ingress
-      args:
-        executable: /bin/bash
-
-    - name: Export kubeconfig
-      ansible.builtin.shell: |
-        mkdir -p /root/.kube
-        microk8s config > /root/.kube/config
-      args:
-        executable: /bin/bash
+  vars_files:
+    - ../group_vars/all.yml
+  roles:
+    - microk8s

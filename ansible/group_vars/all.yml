@@ -1,8 +1,11 @@
 ---
 project_root: /opt/parking
 compose_path: "{{ project_root }}/docker-compose.yml"
-core_api_image: parking-core-api:latest
-email_worker_image: parking-email-worker:latest
+registry: localhost:32000
+core_api_tag: latest
+email_worker_tag: latest
+core_api_image: "{{ registry }}/parking-core-api:{{ core_api_tag }}"
+email_worker_image: "{{ registry }}/parking-email-worker:{{ email_worker_tag }}"
 postgres_password: parking
 keycloak_admin_user: admin
 keycloak_admin_password: admin
@@ -10,3 +13,4 @@ minio_root_user: minioadmin
 minio_root_password: minioadmin
 k8s_namespace: parking
 fqdn: parking-demo.swedencentral.cloudapp.azure.com
+letsencrypt_email: it214145@hua.gr

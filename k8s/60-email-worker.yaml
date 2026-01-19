@@ -18,7 +18,10 @@ spec:
           image: localhost:32000/parking-email-worker:latest
           env:
             - name: ConnectionStrings__Default
-              value: Host=postgres;Port=5432;Database=parking;Username=parking;Password=$(POSTGRES_PASSWORD)
+              valueFrom:
+                secretKeyRef:
+                  name: parking-secrets
+                  key: CONNECTIONSTRINGS_DEFAULT
             - name: Email__Host
               valueFrom:
                 configMapKeyRef:

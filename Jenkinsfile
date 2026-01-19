@@ -1,5 +1,13 @@
 pipeline {
   agent any
+  parameters {
+    string(name: 'CORE_API_TAG', defaultValue: 'latest', description: 'Docker image tag for core API')
+    string(name: 'EMAIL_WORKER_TAG', defaultValue: 'latest', description: 'Docker image tag for email worker')
+  }
+  environment {
+    REGISTRY = "localhost:32000"
+    K8S_NAMESPACE = "parking"
+  }
   stages {
     stage('Apply Manifests') {
       steps {
@@ -13,7 +21,12 @@ pipeline {
           microk8s kubectl apply -f k8s/40-minio.yaml
           microk8s kubectl apply -f k8s/50-core-api.yaml
           microk8s kubectl apply -f k8s/60-email-worker.yaml
+          microk8s kubectl apply -f k8s/95-cert-manager.yaml
           microk8s kubectl apply -f k8s/90-ingress.yaml
+          microk8s kubectl set image deployment/core-api core-api=$REGISTRY/parking-core-api:$CORE_API_TAG -n $K8S_NAMESPACE
+          microk8s kubectl set image deployment/email-worker email-worker=$REGISTRY/parking-email-worker:$EMAIL_WORKER_TAG -n $K8S_NAMESPACE
+          microk8s kubectl rollout status deployment/core-api -n $K8S_NAMESPACE --timeout=2m
+          microk8s kubectl rollout status deployment/email-worker -n $K8S_NAMESPACE --timeout=2m
         '''
       }
     }

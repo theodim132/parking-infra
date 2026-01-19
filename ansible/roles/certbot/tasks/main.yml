@@ -1,0 +1,28 @@
+---
+- name: Install certbot
+  ansible.builtin.package:
+    name: certbot
+    state: present
+
+- name: Create ACME webroot
+  ansible.builtin.file:
+    path: "{{ letsencrypt_webroot }}"
+    state: directory
+    mode: "0755"
+
+- name: Obtain Let's Encrypt certificate
+  ansible.builtin.command: >
+    certbot certonly --webroot
+    --webroot-path {{ letsencrypt_webroot }}
+    --domain {{ domain }}
+    --email {{ letsencrypt_email }}
+    --agree-tos
+    --non-interactive
+  args:
+    creates: /etc/letsencrypt/live/{{ domain }}/fullchain.pem
+
+- name: Enable certbot renewal timer
+  ansible.builtin.systemd:
+    name: certbot.timer
+    state: started
+    enabled: yes
