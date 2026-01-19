@@ -86,6 +86,20 @@ If you want automatic push, set in the Jenkins job:
 - `REGISTRY=localhost:32000`
 - (Optional) `REGISTRY_USER` / `REGISTRY_PASS` if your registry needs auth
 
+## Jenkins Access
+- URL: `https://parking-demo.swedencentral.cloudapp.azure.com/jenkins` (or `http://20.240.193.212:8080/jenkins`)
+- Username: `admin`
+- Password: `ChangeMe_123!_Now`
+- Source: `/var/lib/jenkins/init.groovy.d/02-create-admin.groovy`
+- Action: change this password after first login.
+
+## Nginx vs MicroK8s Ingress
+- Only one MicroK8s install is present.
+- MicroK8s ingress spawns its own nginx master (`/usr/bin/nginx`) and binds 443.
+- This conflicts with the VM Nginx reverse proxy and caused 404s on `/jenkins`.
+- Fix: `https-setup.yml` disables MicroK8s ingress and resets Nginx to use only `/etc/nginx/sites-enabled/parking`.
+- If you need ingress later, choose one public entrypoint (either ingress OR VM Nginx) on port 443.
+
 ### Jenkins setup (VM)
 1) Provision a VM (Ubuntu/Debian) and SSH access.
 2) Run:
