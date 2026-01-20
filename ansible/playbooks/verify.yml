@@ -162,3 +162,27 @@
     - name: Report nginx master parent
       ansible.builtin.debug:
         msg: "{{ nginx_parent.stdout }}"
+
+    - name: Curl Core API health
+      ansible.builtin.shell: |
+        curl -kI https://{{ fqdn }}/api/health | tr -d '\r'
+      args:
+        executable: /bin/bash
+      register: core_api_health
+      changed_when: false
+
+    - name: Report Core API health curl output
+      ansible.builtin.debug:
+        msg: "{{ core_api_health.stdout }}"
+
+    - name: Curl Swagger
+      ansible.builtin.shell: |
+        curl -kI https://{{ fqdn }}/swagger/index.html | tr -d '\r'
+      args:
+        executable: /bin/bash
+      register: swagger_check
+      changed_when: false
+
+    - name: Report Swagger curl output
+      ansible.builtin.debug:
+        msg: "{{ swagger_check.stdout }}"
