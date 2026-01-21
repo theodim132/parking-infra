@@ -16,6 +16,7 @@ spec:
       containers:
         - name: core-api
           image: localhost:32000/parking-core-api:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
           env:

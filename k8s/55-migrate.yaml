@@ -12,6 +12,7 @@ spec:
       containers:
         - name: migrate
           image: localhost:32000/parking-core-api:latest
+          imagePullPolicy: Always
           env:
             - name: MIGRATE_ONLY
               value: "true"
