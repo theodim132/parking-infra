@@ -1,5 +1,5 @@
 ---
-- name: Install Jenkins (Debian/Ubuntu)
+- name: Install and configure Jenkins
   hosts: all
   become: true
   vars_files:
