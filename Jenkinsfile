@@ -23,8 +23,7 @@ pipeline {
           microk8s kubectl apply -f k8s/50-core-api.yaml
           microk8s kubectl rollout status deployment/postgres -n $K8S_NAMESPACE --timeout=2m
           microk8s kubectl delete job/parking-migrate -n $K8S_NAMESPACE --ignore-not-found
-          microk8s kubectl apply -f k8s/55-migrate.yaml
-          microk8s kubectl set image job/parking-migrate migrate=$REGISTRY/parking-core-api:$CORE_API_TAG -n $K8S_NAMESPACE
+          sed "s|localhost:32000/parking-core-api:latest|$REGISTRY/parking-core-api:$CORE_API_TAG|" k8s/55-migrate.yaml | microk8s kubectl apply -f -
           microk8s kubectl wait --for=condition=complete job/parking-migrate -n $K8S_NAMESPACE --timeout=5m
           if [ "${DEPLOY_EMAIL_WORKER}" = "true" ]; then
             microk8s kubectl apply -f k8s/60-email-worker.yaml
