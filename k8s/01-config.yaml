@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: parking-config
+  namespace: parking
+data:
+  POSTGRES_DB: parking
+  POSTGRES_USER: parking
+  KEYCLOAK_ADMIN: admin
+  KC_HTTP_ENABLED: "true"
+  AUTH_AUTHORITY: https://parking-demo.swedencentral.cloudapp.azure.com/auth/realms/parking
+  AUTH_REQUIRE_HTTPS_METADATA: "true"
+  AUTH_AUDIENCE: parking-api
+  AUTH_CLIENT_ID: parking-ui
+  STORAGE_PROVIDER: S3
+  STORAGE_ENDPOINT: http://minio:9000
+  STORAGE_BUCKET: parking-docs
+  STORAGE_FORCE_PATH_STYLE: "true"
+  EMAIL_HOST: mailhog
+  EMAIL_PORT: "1025"
+  EMAIL_FROM: noreply@parking.local
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: parking-secrets
+  namespace: parking
+type: Opaque
+stringData:
+  POSTGRES_PASSWORD: parking
+  CONNECTIONSTRINGS_DEFAULT: Host=postgres;Port=5432;Database=parking;Username=parking;Password=parking
+  KEYCLOAK_ADMIN_PASSWORD: admin
+  MINIO_ROOT_USER: minioadmin
+  MINIO_ROOT_PASSWORD: minioadmin
+  STORAGE_ACCESS_KEY: minioadmin
+  STORAGE_SECRET_KEY: minioadmin

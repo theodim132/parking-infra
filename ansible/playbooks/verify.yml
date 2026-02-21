@@ -1,0 +1,188 @@
+---
+- name: Verify VM services
+  hosts: all
+  become: true
+  vars_files:
+    - ../group_vars/all.yml
+  vars:
+    jenkins_local_url: "http://127.0.0.1:8080/jenkins/login"
+    jenkins_public_url: "https://{{ fqdn }}/jenkins"
+    jenkins_local_https_host: "https://127.0.0.1/jenkins"
+  tasks:
+    - name: Check Jenkins service
+      ansible.builtin.systemd:
+        name: jenkins
+      register: jenkins_status
+
+    - name: Report Jenkins status
+      ansible.builtin.debug:
+        msg: "Jenkins active: {{ jenkins_status.status.ActiveState }}"
+
+    - name: Check Jenkins local URL
+      ansible.builtin.uri:
+        url: "{{ jenkins_local_url }}"
+        method: GET
+        status_code: [200, 302, 403]
+        return_content: false
+      register: jenkins_local_check
+
+    - name: Report Jenkins local URL status
+      ansible.builtin.debug:
+        msg: "Jenkins local HTTP status: {{ jenkins_local_check.status }}"
+
+    - name: Check Jenkins public URL
+      ansible.builtin.uri:
+        url: "{{ jenkins_public_url }}"
+        method: GET
+        status_code: [200, 301, 302, 403]
+        return_content: false
+        validate_certs: true
+      register: jenkins_public_check
+      failed_when: false
+
+    - name: Report Jenkins public URL status
+      ansible.builtin.debug:
+        msg: "Jenkins public HTTPS status: {{ jenkins_public_check.status | default('error') }}"
+
+    - name: Check Jenkins via localhost HTTPS with Host header
+      ansible.builtin.uri:
+        url: "{{ jenkins_local_https_host }}"
+        method: GET
+        status_code: [200, 301, 302, 403]
+        return_content: false
+        validate_certs: false
+        headers:
+          Host: "{{ fqdn }}"
+      register: jenkins_local_https_check
+      failed_when: false
+
+    - name: Report Jenkins localhost HTTPS status
+      ansible.builtin.debug:
+        msg: "Jenkins localhost HTTPS status: {{ jenkins_local_https_check.status }}"
+
+    - name: Report Jenkins public headers
+      ansible.builtin.debug:
+        msg: "Jenkins public headers: {{ jenkins_public_check.headers | default({}) }}"
+
+    - name: Report Jenkins localhost HTTPS headers
+      ansible.builtin.debug:
+        msg: "Jenkins localhost HTTPS headers: {{ jenkins_local_https_check.headers | default({}) }}"
+
+    - name: Curl Jenkins public HTTPS headers
+      ansible.builtin.shell: |
+        curl -kI https://{{ fqdn }}/jenkins | tr -d '\r'
+      args:
+        executable: /bin/bash
+      register: jenkins_public_curl
+      changed_when: false
+
+    - name: Report Jenkins public curl output
+      ansible.builtin.debug:
+        msg: "{{ jenkins_public_curl.stdout }}"
+
+    - name: Curl Jenkins via 127.0.0.1 with SNI
+      ansible.builtin.shell: |
+        curl -kI --resolve {{ fqdn }}:443:127.0.0.1 https://{{ fqdn }}/jenkins | tr -d '\r'
+      args:
+        executable: /bin/bash
+      register: jenkins_sni_curl
+      changed_when: false
+
+    - name: Report Jenkins SNI curl output
+      ansible.builtin.debug:
+        msg: "{{ jenkins_sni_curl.stdout }}"
+
+    - name: Curl Jenkins via 127.0.0.1 with SNI (HTTP/1.1)
+      ansible.builtin.shell: |
+        curl --http1.1 -kI --resolve {{ fqdn }}:443:127.0.0.1 https://{{ fqdn }}/jenkins | tr -d '\r'
+      args:
+        executable: /bin/bash
+      register: jenkins_sni_curl_http1
+      changed_when: false
+
+    - name: Report Jenkins SNI curl output (HTTP/1.1)
+      ansible.builtin.debug:
+        msg: "{{ jenkins_sni_curl_http1.stdout }}"
+
+    - name: Show listeners on 443
+      ansible.builtin.shell: |
+        ss -tulpn | grep ':443' || true
+      args:
+        executable: /bin/bash
+      register: listeners_443
+      changed_when: false
+
+    - name: Report 443 listeners
+      ansible.builtin.debug:
+        msg: "{{ listeners_443.stdout }}"
+
+    - name: Show nginx master process command
+      ansible.builtin.shell: |
+        ps -eo pid,cmd | grep 'nginx: master' | grep -v grep || true
+      args:
+        executable: /bin/bash
+      register: nginx_master_cmd
+      changed_when: false
+
+    - name: Report nginx master command
+      ansible.builtin.debug:
+        msg: "{{ nginx_master_cmd.stdout }}"
+
+    - name: Show nginx master PIDs with PPID
+      ansible.builtin.shell: |
+        ps -eo pid,ppid,cmd | grep 'nginx: master' | grep -v grep || true
+      args:
+        executable: /bin/bash
+      register: nginx_master_ppid
+      changed_when: false
+
+    - name: Report nginx master PIDs
+      ansible.builtin.debug:
+        msg: "{{ nginx_master_ppid.stdout }}"
+
+    - name: Find parent PID for /usr/bin/nginx master
+      ansible.builtin.shell: |
+        ps -eo pid,ppid,cmd | grep -F "/usr/bin/nginx -c /etc/nginx/nginx.conf" | grep -v grep | awk '{print $2}' | head -n1
+      args:
+        executable: /bin/bash
+      register: nginx_extra_ppid
+      changed_when: false
+      failed_when: false
+
+    - name: Show parent process for extra nginx master
+      ansible.builtin.shell: |
+        if [ -n "{{ nginx_extra_ppid.stdout }}" ]; then
+          ps -p {{ nginx_extra_ppid.stdout }} -o pid,ppid,cmd
+        fi
+      args:
+        executable: /bin/bash
+      register: nginx_parent
+      changed_when: false
+
+    - name: Report nginx master parent
+      ansible.builtin.debug:
+        msg: "{{ nginx_parent.stdout }}"
+
+    - name: Curl Core API health
+      ansible.builtin.shell: |
+        curl -kI https://{{ fqdn }}/api/health | tr -d '\r'
+      args:
+        executable: /bin/bash
+      register: core_api_health
+      changed_when: false
+
+    - name: Report Core API health curl output
+      ansible.builtin.debug:
+        msg: "{{ core_api_health.stdout }}"
+
+    - name: Curl Swagger
+      ansible.builtin.shell: |
+        curl -kI https://{{ fqdn }}/swagger/index.html | tr -d '\r'
+      args:
+        executable: /bin/bash
+      register: swagger_check
+      changed_when: false
+
+    - name: Report Swagger curl output
+      ansible.builtin.debug:
+        msg: "{{ swagger_check.stdout }}"

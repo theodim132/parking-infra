@@ -1,0 +1,78 @@
+---
+- name: Verify Nginx reverse proxy
+  hosts: all
+  become: true
+  vars_files:
+    - ../group_vars/all.yml
+  vars:
+    nginx_site: /etc/nginx/sites-enabled/parking
+    nginx_conf: /etc/nginx/sites-available/parking
+    jenkins_path: /jenkins
+    expected_host: "{{ fqdn }}"
+    jenkins_upstream: http://127.0.0.1:8080
+  tasks:
+    - name: Check parking site symlink exists
+      ansible.builtin.stat:
+        path: "{{ nginx_site }}"
+      register: parking_site_stat
+
+    - name: Report parking site link
+      ansible.builtin.debug:
+        msg: "parking site present: {{ parking_site_stat.stat.exists }}"
+
+    - name: Read Nginx site config
+      ansible.builtin.slurp:
+        src: "{{ nginx_conf }}"
+      register: nginx_site_conf
+      when: parking_site_stat.stat.exists
+
+    - name: Report Nginx site config has server_name
+      ansible.builtin.debug:
+        msg: "server_name contains fqdn: {{ (nginx_site_conf.content | b64decode).find('server_name ' + expected_host) != -1 }}"
+      when: parking_site_stat.stat.exists
+
+    - name: Report Nginx site config has /jenkins route
+      ansible.builtin.debug:
+        msg: "location /jenkins present: {{ (nginx_site_conf.content | b64decode).find('location /jenkins') != -1 }}"
+      when: parking_site_stat.stat.exists
+
+    - name: Report Nginx site config has Jenkins upstream
+      ansible.builtin.debug:
+        msg: "proxy_pass to Jenkins upstream: {{ (nginx_site_conf.content | b64decode).find('proxy_pass ' + jenkins_upstream) != -1 }}"
+      when: parking_site_stat.stat.exists
+
+    - name: Show Nginx site config (parking)
+      ansible.builtin.debug:
+        msg: "{{ nginx_site_conf.content | b64decode }}"
+      when: parking_site_stat.stat.exists
+
+    - name: Test Nginx config
+      ansible.builtin.command: nginx -t
+      changed_when: false
+
+    - name: Dump active Nginx config (filtered)
+      ansible.builtin.shell: |
+        nginx -T 2>/dev/null | sed -n '/server_name {{ fqdn }}/,/^}/p'
+      args:
+        executable: /bin/bash
+      register: nginx_dump
+      changed_when: false
+
+    - name: List Nginx config files that declare this domain
+      ansible.builtin.shell: |
+        nginx -T 2>/dev/null | awk '
+          /^# configuration file / { file=$4 }
+          $0 ~ /server_name/ && $0 ~ /{{ fqdn }}/ { print file }
+        ' | sort -u
+      args:
+        executable: /bin/bash
+      register: nginx_domain_files
+      changed_when: false
+
+    - name: Show Nginx files for domain
+      ansible.builtin.debug:
+        msg: "{{ nginx_domain_files.stdout_lines }}"
+
+    - name: Show active server block
+      ansible.builtin.debug:
+        msg: "{{ nginx_dump.stdout }}"

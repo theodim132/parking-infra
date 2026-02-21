@@ -1,0 +1,45 @@
+---
+- name: Test Core API
+  hosts: all
+  become: true
+  vars_files:
+    - ../group_vars/all.yml
+  vars:
+    base_url: "https://{{ fqdn }}"
+  tasks:
+    - name: List applications
+      ansible.builtin.uri:
+        url: "{{ base_url }}/api/applications"
+        method: GET
+        headers:
+          X-Citizen-Id: citizen1
+        validate_certs: true
+        status_code: [200, 401, 403]
+      register: list_apps
+      failed_when: false
+
+    - name: Report list applications status
+      ansible.builtin.debug:
+        msg: "List applications status: {{ list_apps.status }}"
+
+    - name: Create application
+      ansible.builtin.uri:
+        url: "{{ base_url }}/api/applications"
+        method: POST
+        headers:
+          X-Citizen-Id: citizen1
+        body_format: json
+        body:
+          fullName: "Demo Citizen"
+          address: "Main 1"
+          plateNumber: "ABC1234"
+          email: "citizen1@parking.local"
+          phone: "6900000000"
+        validate_certs: true
+        status_code: [200, 201, 400, 401, 403]
+      register: create_app
+      failed_when: false
+
+    - name: Report create application status
+      ansible.builtin.debug:
+        msg: "Create application status: {{ create_app.status }}"

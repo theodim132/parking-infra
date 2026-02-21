@@ -1,0 +1,78 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: parking-migrate
+  namespace: parking
+spec:
+  ttlSecondsAfterFinished: 300
+  backoffLimit: 2
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: migrate
+          image: localhost:32000/parking-core-api:latest
+          imagePullPolicy: Always
+          env:
+            - name: MIGRATE_ONLY
+              value: "true"
+            - name: ConnectionStrings__Default
+              valueFrom:
+                secretKeyRef:
+                  name: parking-secrets
+                  key: CONNECTIONSTRINGS_DEFAULT
+            - name: Auth__Authority
+              valueFrom:
+                configMapKeyRef:
+                  name: parking-config
+                  key: AUTH_AUTHORITY
+            - name: Auth__RequireHttpsMetadata
+              valueFrom:
+                configMapKeyRef:
+                  name: parking-config
+                  key: AUTH_REQUIRE_HTTPS_METADATA
+            - name: Auth__Audience
+              valueFrom:
+                configMapKeyRef:
+                  name: parking-config
+                  key: AUTH_AUDIENCE
+            - name: Auth__ClientId
+              valueFrom:
+                configMapKeyRef:
+                  name: parking-config
+                  key: AUTH_CLIENT_ID
+            - name: Auth__ClientSecret
+              valueFrom:
+                secretKeyRef:
+                  name: parking-secrets
+                  key: AUTH_CLIENT_SECRET
+            - name: Storage__Provider
+              valueFrom:
+                configMapKeyRef:
+                  name: parking-config
+                  key: STORAGE_PROVIDER
+            - name: Storage__Endpoint
+              valueFrom:
+                configMapKeyRef:
+                  name: parking-config
+                  key: STORAGE_ENDPOINT
+            - name: Storage__Bucket
+              valueFrom:
+                configMapKeyRef:
+                  name: parking-config
+                  key: STORAGE_BUCKET
+            - name: Storage__ForcePathStyle
+              valueFrom:
+                configMapKeyRef:
+                  name: parking-config
+                  key: STORAGE_FORCE_PATH_STYLE
+            - name: Storage__AccessKey
+              valueFrom:
+                secretKeyRef:
+                  name: parking-secrets
+                  key: STORAGE_ACCESS_KEY
+            - name: Storage__SecretKey
+              valueFrom:
+                secretKeyRef:
+                  name: parking-secrets
+                  key: STORAGE_SECRET_KEY

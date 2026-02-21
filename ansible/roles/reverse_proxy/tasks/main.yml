@@ -1,0 +1,36 @@
+---
+- name: Install nginx
+  ansible.builtin.package:
+    name: nginx
+    state: present
+    update_cache: yes
+
+- name: Render Nginx site
+  ansible.builtin.template:
+    src: site.conf.j2
+    dest: /etc/nginx/sites-available/parking
+    mode: "0644"
+  notify: Reload nginx
+
+- name: Enable parking site
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/parking
+    dest: /etc/nginx/sites-enabled/parking
+    state: link
+  notify: Reload nginx
+
+- name: Remove default nginx site
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: Reload nginx
+
+- name: Test nginx configuration
+  ansible.builtin.command: nginx -t
+  changed_when: false
+
+- name: Ensure nginx is started and enabled
+  ansible.builtin.systemd:
+    name: nginx
+    state: started
+    enabled: yes

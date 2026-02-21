@@ -1,0 +1,8 @@
+---
+- name: Install MicroK8s and kubectl
+  hosts: all
+  become: true
+  vars_files:
+    - ../group_vars/all.yml
+  roles:
+    - microk8s

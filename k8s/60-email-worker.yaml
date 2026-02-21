@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: email-worker
+  namespace: parking
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: email-worker
+  template:
+    metadata:
+      labels:
+        app: email-worker
+    spec:
+      containers:
+        - name: email-worker
+          image: localhost:32000/parking-email-worker:latest
+          env:
+            - name: ConnectionStrings__Default
+              valueFrom:
+                secretKeyRef:
+                  name: parking-secrets
+                  key: CONNECTIONSTRINGS_DEFAULT
+            - name: Email__Host
+              valueFrom:
+                configMapKeyRef:
+                  name: parking-config
+                  key: EMAIL_HOST
+            - name: Email__Port
+              valueFrom:
+                configMapKeyRef:
+                  name: parking-config
+                  key: EMAIL_PORT
+            - name: Email__From
+              valueFrom:
+                configMapKeyRef:
+                  name: parking-config
+                  key: EMAIL_FROM
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: parking-secrets
+                  key: POSTGRES_PASSWORD

@@ -1,0 +1,15 @@
+---
+- name: Install Docker engine (Debian/Ubuntu)
+  ansible.builtin.shell: |
+    set -e
+    if ! command -v docker >/dev/null 2>&1; then
+      curl -fsSL https://get.docker.com | sh
+    fi
+  args:
+    executable: /bin/bash
+
+- name: Enable Docker service
+  ansible.builtin.service:
+    name: docker
+    state: started
+    enabled: true

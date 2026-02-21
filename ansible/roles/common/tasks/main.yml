@@ -1,0 +1,9 @@
+---
+- name: Install base packages
+  ansible.builtin.package:
+    name:
+      - curl
+      - git
+      - ca-certificates
+      - ansible
+    state: present

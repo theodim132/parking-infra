@@ -1,0 +1,23 @@
+---
+project_root: /opt/parking
+compose_path: "{{ project_root }}/docker-compose.yml"
+registry: localhost:32000
+core_api_tag: latest
+email_worker_tag: latest
+core_api_image: "{{ registry }}/parking-core-api:{{ core_api_tag }}"
+email_worker_image: "{{ registry }}/parking-email-worker:{{ email_worker_tag }}"
+postgres_password: parking
+keycloak_admin_user: admin
+keycloak_admin_password: admin
+minio_root_user: minioadmin
+minio_root_password: minioadmin
+k8s_namespace: parking
+fqdn: parking-demo.swedencentral.cloudapp.azure.com
+letsencrypt_email: it214145@hua.gr
+
+# Jenkins CI/CD Configuration
+jenkins_branch: master
+jenkins_core_api_repo: https://github.com/theodim132/parking-core-api.git
+jenkins_email_worker_repo: https://github.com/theodim132/parking-email-worker.git
+jenkins_infra_repo: https://github.com/theodim132/parking-infra.git
+jenkins_git_credentials_id: "github-credentials"

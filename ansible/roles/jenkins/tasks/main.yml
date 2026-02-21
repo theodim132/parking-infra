@@ -1,0 +1,87 @@
+---
+- name: Install Java
+  ansible.builtin.package:
+    name: openjdk-17-jre
+    state: present
+
+- name: Add Jenkins key and repo
+  ansible.builtin.shell: |
+    curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | tee /usr/share/keyrings/jenkins-keyring.asc >/dev/null
+    echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list
+    apt-get update
+  args:
+    executable: /bin/bash
+
+- name: Install Jenkins
+  ansible.builtin.package:
+    name: jenkins
+    state: present
+
+- name: Enable Jenkins
+  ansible.builtin.service:
+    name: jenkins
+    state: started
+    enabled: true
+
+- name: Add Jenkins user to docker group
+  ansible.builtin.user:
+    name: jenkins
+    groups: docker
+    append: true
+
+- name: Add Jenkins to microk8s group
+  ansible.builtin.user:
+    name: jenkins
+    groups: microk8s
+    append: true
+  ignore_errors: true
+
+- name: Wait for Jenkins to start
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:8080/jenkins/login"
+    status_code: 200
+  register: jenkins_ready
+  until: jenkins_ready.status == 200
+  retries: 30
+  delay: 10
+
+- name: Create Jenkins job directories
+  ansible.builtin.file:
+    path: "/var/lib/jenkins/jobs/{{ item }}"
+    state: directory
+    owner: jenkins
+    group: jenkins
+    mode: '0755'
+  loop:
+    - parking-core-api
+    - parking-email-worker
+    - parking-infra
+
+- name: Deploy parking-core-api job config
+  ansible.builtin.template:
+    src: parking-core-api-job.xml.j2
+    dest: /var/lib/jenkins/jobs/parking-core-api/config.xml
+    owner: jenkins
+    group: jenkins
+    mode: '0644'
+
+- name: Deploy parking-email-worker job config
+  ansible.builtin.template:
+    src: parking-email-worker-job.xml.j2
+    dest: /var/lib/jenkins/jobs/parking-email-worker/config.xml
+    owner: jenkins
+    group: jenkins
+    mode: '0644'
+
+- name: Deploy parking-infra job config
+  ansible.builtin.template:
+    src: parking-infra-job.xml.j2
+    dest: /var/lib/jenkins/jobs/parking-infra/config.xml
+    owner: jenkins
+    group: jenkins
+    mode: '0644'
+
+- name: Restart Jenkins to load jobs
+  ansible.builtin.service:
+    name: jenkins
+    state: restarted

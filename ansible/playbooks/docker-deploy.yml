@@ -1,0 +1,10 @@
+---
+- name: Deploy stack via docker-compose
+  hosts: all
+  become: true
+  vars_files:
+    - ../group_vars/all.yml
+  vars:
+    compose_template: "{{ playbook_dir }}/../templates/docker-compose.yml.j2"
+  roles:
+    - app_compose
