@@ -16,7 +16,7 @@ fqdn: parking-demo.swedencentral.cloudapp.azure.com
 letsencrypt_email: it214145@hua.gr
 
 # Jenkins CI/CD Configuration
-jenkins_branch: master
+jenkins_branch: main
 jenkins_core_api_repo: https://github.com/theodim132/parking-core-api.git
 jenkins_email_worker_repo: https://github.com/theodim132/parking-email-worker.git
 jenkins_infra_repo: https://github.com/theodim132/parking-infra.git
