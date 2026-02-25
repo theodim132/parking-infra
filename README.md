@@ -64,6 +64,7 @@ ansible-playbook -i ansible/inventories/dev/hosts.ini ansible/playbooks/verify.y
 
 - Update `k8s/90-ingress.yaml` host for your domain
 - Keep `ansible/group_vars/all.yml` aligned with registry/tags/FQDN
+- Keep `ansible/group_vars/all.yml` `jenkins_branch` aligned with the active Git branch (for example `main`) to ensure webhook-triggered builds run.
 
 ## Related Repositories
 
