@@ -22,7 +22,7 @@ server {
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers HIGH:!aNULL:!MD5;
     add_header X-Served-By "parking-nginx" always;
-
+    
     # Jenkins
     location = /jenkins {
         return 301 /jenkins/;
