@@ -26,6 +26,7 @@ metadata:
   name: mailhog
   namespace: parking
 spec:
+  type: NodePort
   selector:
     app: mailhog
   ports:
@@ -35,3 +36,4 @@ spec:
     - name: http
       port: 8025
       targetPort: 8025
+      nodePort: 30025

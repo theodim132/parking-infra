@@ -32,3 +32,29 @@ spec:
                 name: core-api
                 port:
                   number: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: parking-mailhog-ingress
+  namespace: parking
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: public
+  tls:
+    - hosts:
+        - parking-demo.swedencentral.cloudapp.azure.com
+      secretName: parking-tls
+  rules:
+    - host: parking-demo.swedencentral.cloudapp.azure.com
+      http:
+        paths:
+          - path: /mailhog(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: mailhog
+                port:
+                  number: 8025
